@@ -1,0 +1,16 @@
+#!/bin/bash
+set -x
+exec > >(tee /var/log/user-data.log|logger -t user-data ) 2>&1
+echo BEGIN
+date '+%Y-%m-%d %H:%M:%S'
+
+yum update -y
+while [ -f /dev/xvdh ] ; do sleep 1 ; done
+vgchange -ay vg01
+lvscan
+setenforce 0
+sed -i 's/^SELINUX=.*/SELINUX=permissive/g' /etc/selinux/config
+cd /root/ && git clone git@github.com:travismoran/rancher-salt.git
+rm -rf /srv/salt
+ln -s /root/rancher-salt /srv/salt
+salt-call --local state.apply

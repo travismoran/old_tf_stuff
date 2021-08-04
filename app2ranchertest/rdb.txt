@@ -1,0 +1,6 @@
+#!/bin/bash
+set -x
+exec > >(tee /var/log/user-data.log|logger -t user-data ) 2>&1
+echo BEGIN
+date '+%Y-%m-%d %H:%M:%S'
+sudo hostnamectl set-hostname rancher.DOMAIN.internal

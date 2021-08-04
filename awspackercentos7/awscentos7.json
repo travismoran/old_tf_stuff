@@ -1,0 +1,75 @@
+{
+  "variables": {
+    "source_ami_id": "ami-e1496384",
+    "aws_region": "us-east-2",
+    "dest_ami_name": "awscentos7-{{timestamp}}"
+  },
+
+  "builders": [{
+      "type": "amazon-ebs",
+      "region": "{{user `aws_region`}}",
+      "source_ami": "{{user `source_ami_id`}}",
+      "instance_type": "t2.micro",
+      "ami_block_device_mappings": [
+        {
+          "device_name": "/dev/sda1",
+          "volume_type": "standard",
+          "delete_on_termination": true
+        }
+      ],
+      "ssh_username": "centos",
+      "ssh_pty": true,
+      "ami_name": "{{user `dest_ami_name`}}",
+      "ami_description": "CentOS 7 HVM AMI based on the official Marketplace image with latest patches applied"
+    }],
+
+   "provisioners": [
+        {
+            "type": "shell",
+            "inline":[
+                "mkdir -p /home/centos/.ssh/"                
+            ]
+        },
+        {
+            "type": "file",
+            "source": "./bitbucket",
+            "destination": "/home/centos/.ssh/"
+        },
+		{
+            "type": "file",
+            "source": "./ssh_config",
+            "destination": "/home/centos/.ssh/config"
+        },
+        {
+            "type": "shell",
+            "inline":[
+                "chmod 700 /home/centos/.ssh",
+                "chmod 600 /home/centos/.ssh/*"
+            ]
+        },
+		{
+            "type": "shell",
+            "inline":[
+                "sudo yum clean all",
+                "sudo yum -y update",
+				"sudo yum -y install git",
+				"sudo yum -y install epel-release",
+				"sudo yum -y install salt-minion",
+				"sudo yum -y install lvm2"
+				
+            ]
+        },
+        {
+            "type": "shell",
+            "inline":[
+                "sudo yum -y install vim",
+				"sudo yum -y install mlocate",
+				"sudo mkdir -p /root/.ssh/",
+				"sudo mkdir -p /data01",
+				"sudo cp -r /home/centos/.ssh/ /root/.ssh/",
+				"sudo chown -R root:root /root/.ssh/",
+				"sudo updatedb"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,8 @@
+#!/bin/bash
+set -x
+exec > >(tee /var/log/user-data.log|logger -t user-data ) 2>&1
+echo BEGIN
+date '+%Y-%m-%d %H:%M:%S'
+apt-get -y update
+curl https://releases.rancher.com/install-docker/18.03.sh | sh
+docker run -d --restart=unless-stopped -p 8080:8080 rancher/server --db-host HOST.SUBDOMAIN.us-east-2.rds.amazonaws.com --db-port 3306 --db-user cattle-user --db-pass DBPASSHERE --db-name cattle

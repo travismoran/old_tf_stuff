@@ -1,0 +1,8 @@
+#!/bin/bash
+set -x
+exec > >(tee /var/log/user-data.log|logger -t user-data ) 2>&1
+echo BEGIN
+date '+%Y-%m-%d %H:%M:%S'
+sudo hostnamectl set-hostname DOMAIN-APP2.DOMAIN.internal
+sudo curl https://releases.rancher.com/install-docker/18.03.sh | sudo sh
+sudo docker run -e CATTLE_HOST_LABELS='host=DOMAIN-APP2' -d --privileged -v /var/run/docker.sock:/var/run/docker.sock -v /var/lib/rancher:/var/lib/rancher rancher/agent:v0.11.0 http://10.10.10.10:8080/v1/scripts/KEY:KEY:KEY
